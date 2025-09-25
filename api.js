@@ -59,14 +59,21 @@ app.post("/sensores", async (req, res) => {
   }
 });
 
-
 app.get("/", async (req, res) => {
   try {
     const leituras = await prisma.nivel.findMany({
       orderBy: { dataHora: "desc" },
       take: 20,
     });
-    res.json(leituras);
+
+    const resultadoFormatado = leituras.map(leitura => ({
+      silo: leitura.silo,
+      distancia_cm: leitura.distancia_cm,
+      porcentagem: `${leitura.porcentagem}%`,
+      dataHora: formatarDataHora(new Date(leitura.dataHora)),
+    }));
+
+    res.json(resultadoFormatado);
   } catch (error) {
     console.error("Erro ao buscar os dados:", error);
     res.status(500).json({ erro: "Erro ao buscar os dados." });
