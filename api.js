@@ -60,18 +60,16 @@ app.post("/sensores", async (req, res) => {
 });
 
 
-app.get("/sensores", async (req, res) => {
+app.get("/", async (req, res) => {
   try {
     const leituras = await prisma.nivel.findMany({
       orderBy: { dataHora: "desc" },
       take: 20,
     });
-
     res.json(leituras);
   } catch (error) {
     console.error("Erro ao buscar os dados:", error);
     res.status(500).json({ erro: "Erro ao buscar os dados." });
   }
 });
-
 app.listen(PORT, () => console.log(`API funcionando na porta ${PORT}`));
