@@ -7,6 +7,16 @@ const prisma = new PrismaClient();
 
 app.use(express.json());
 
+
+function formatarDataHora(data) {
+  const dia = String(data.getDate()).padStart(2, "0");
+  const mes = String(data.getMonth() + 1).padStart(2, "0");
+  const ano = data.getFullYear();
+  const hora = String(data.getHours()).padStart(2, "0");
+  const minuto = String(data.getMinutes()).padStart(2, "0");
+  return `${dia}/${mes}/${ano} ${hora}:${minuto}`;
+}
+
 function converterParaPorcentagem(distancia_cm, altura_total_cm = 100) {
   const altura_racao = altura_total_cm - distancia_cm;
   if (altura_racao < 0) return 0;
@@ -23,16 +33,6 @@ app.post("/sensores", async (req, res) => {
 
   const distancia_cm = distancia_mm / 10;
   const porcentagem = converterParaPorcentagem(distancia_cm);
-
-  
-  function formatarDataHora(data) {
-    const dia = String(data.getDate()).padStart(2, "0");
-    const mes = String(data.getMonth() + 1).padStart(2, "0");
-    const ano = data.getFullYear();
-    const hora = String(data.getHours()).padStart(2, "0");
-    const minuto = String(data.getMinutes()).padStart(2, "0");
-    return `${dia}/${mes}/${ano} ${hora}:${minuto}`;
-  }
 
   try {
     const newReading = await prisma.nivel.create({
@@ -79,4 +79,5 @@ app.get("/", async (req, res) => {
     res.status(500).json({ erro: "Erro ao buscar os dados." });
   }
 });
+
 app.listen(PORT, () => console.log(`API funcionando na porta ${PORT}`));
