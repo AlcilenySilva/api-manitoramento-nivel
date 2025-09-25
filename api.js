@@ -14,7 +14,6 @@ function converterParaPorcentagem(distancia_cm, altura_total_cm = 100) {
   return Math.round((altura_racao / altura_total_cm) * 100);
 }
 
-
 app.post("/sensores", async (req, res) => {
   const { distancia_mm, silo_id } = req.body;
 
@@ -25,12 +24,13 @@ app.post("/sensores", async (req, res) => {
   const distancia_cm = distancia_mm / 10;
   const porcentagem = converterParaPorcentagem(distancia_cm);
 
+  
   function formatarDataHora(data) {
-    const dia = String(data.getDate()).padStart(2, '0');
-    const mes = String(data.getMonth() + 1).padStart(2, '0');
+    const dia = String(data.getDate()).padStart(2, "0");
+    const mes = String(data.getMonth() + 1).padStart(2, "0");
     const ano = data.getFullYear();
-    const hora = String(data.getHours()).padStart(2, '0');
-    const minuto = String(data.getMinutes()).padStart(2, '0');
+    const hora = String(data.getHours()).padStart(2, "0");
+    const minuto = String(data.getMinutes()).padStart(2, "0");
     return `${dia}/${mes}/${ano} ${hora}:${minuto}`;
   }
 
@@ -56,8 +56,6 @@ app.post("/sensores", async (req, res) => {
   } catch (error) {
     console.error("Erro ao salvar os dados:", error);
     res.status(500).json({ erro: "Erro ao salvar os dados no banco de dados." });
-  } finally {
-    await prisma.$disconnect();
   }
 });
 
@@ -65,8 +63,8 @@ app.post("/sensores", async (req, res) => {
 app.get("/sensores", async (req, res) => {
   try {
     const leituras = await prisma.nivel.findMany({
-      orderBy: { dataHora: "desc" }, 
-      take: 20, 
+      orderBy: { dataHora: "desc" },
+      take: 20,
     });
 
     res.json(leituras);
@@ -75,7 +73,5 @@ app.get("/sensores", async (req, res) => {
     res.status(500).json({ erro: "Erro ao buscar os dados." });
   }
 });
-
-
 
 app.listen(PORT, () => console.log(`API funcionando na porta ${PORT}`));
