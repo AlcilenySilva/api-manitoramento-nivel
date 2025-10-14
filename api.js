@@ -77,7 +77,6 @@ app.post("/sensores", async (req, res) => {
 app.get("/", async (req, res) => {
   try {
     const leituras = await prisma.nivel.findMany({
-      orderBy: { dataHora: "desc" },
       take: 20,
     });
 
