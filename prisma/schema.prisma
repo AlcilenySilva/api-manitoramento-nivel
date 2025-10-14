@@ -15,10 +15,9 @@ datasource db {
 
 model nivel {
   id           Int      @id @default(autoincrement())
-  silo         String
+  silo_name    String   @default("Desconhecido")
   distancia_cm Float
-  porcentagem  Float
-  dataHora     DateTime @default(now()) 
+  dataHora     DateTime @default(now())
 
   @@map("silo_data")
-} 
+}

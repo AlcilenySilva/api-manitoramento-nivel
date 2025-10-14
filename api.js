@@ -23,36 +23,51 @@ function converterParaPorcentagem(distancia_cm, altura_total_cm = 100) {
   if (altura_racao > altura_total_cm) return 100;
   return Math.round((altura_racao / altura_total_cm) * 100);
 }
-
-app.post("/sensores", async (req, res) => {
-  const { distancia_mm, silo_id } = req.body;
-
-  if (distancia_mm === undefined || !silo_id) {
-    return res.status(400).json({ erro: "distancia_mm e silo_id são obrigatórios" });
-  }
-
-  const distancia_cm = distancia_mm / 10;
-  const porcentagem = converterParaPorcentagem(distancia_cm);
+app.post("/new-silo", async (req, res) => {
+  const { silo_name } = req.body;
 
   try {
-    const newReading = await prisma.nivel.create({
+    const newSilo = await prisma.nivel.create({
       data: {
-        silo: silo_id,
-        distancia_cm,
-        porcentagem,
+        silo_name: silo_name,
+        distancia_cm: 0,
       },
     });
 
-    console.log("Dados salvos no banco:", newReading);
+    console.log("Novo silo criado:", newSilo);
 
-    const responseData = {
-      silo: newReading.silo,
-      distancia_cm: newReading.distancia_cm,
-      porcentagem: `${newReading.porcentagem}%`,
-      dataHora: formatarDataHora(newReading.dataHora),
-    };
+    res.status(201).json({
+      message: "Novo silo criado com sucesso.",
+      silo_name: newSilo.silo_name,
+      id: newSilo.id,
+    });
+  } catch (error) {
+    console.error("Erro ao criar o silo:", error);
+    res.status(500).json({ erro: "Erro ao criar o silo no banco de dados." });
+  }
+});
 
-    res.status(201).json(responseData);
+app.post("/sensores", async (req, res) => {
+  const { distancia_mm, id } = req.body;
+
+  try {
+    const newReading = await prisma.nivel.update({
+      where: { id },
+      data: {
+        distancia_mm: distancia_mm,
+        dataHora: new Date(),
+      },
+    });
+
+    console.log("Leitura salva no banco:", newReading);
+
+    res.status(201).json({
+      message: "Leitura salva com sucesso.",
+      id: newReading.id,
+      silo_name: newReading.silo_name,
+      distancia_mm: newReading.distancia_mm,
+      dataHora: formatarDataHora(new Date(newReading.dataHora)),
+    });
   } catch (error) {
     console.error("Erro ao salvar os dados:", error);
     res.status(500).json({ erro: "Erro ao salvar os dados no banco de dados." });
@@ -66,11 +81,14 @@ app.get("/", async (req, res) => {
       take: 20,
     });
 
-    const resultadoFormatado = leituras.map(leitura => ({
-      silo: leitura.silo,
-      distancia_cm: leitura.distancia_cm,
-      porcentagem: `${leitura.porcentagem}%`,
-      dataHora: formatarDataHora(new Date(leitura.dataHora)),
+    const horaConsulta = new Date();
+
+    const resultadoFormatado = leituras.map((leitura) => ({
+      silo_name: leitura.silo_name,
+      distancia_bruta_mm: leitura.distancia_mm,
+      porcentagem: `${converterParaPorcentagem(leitura.distancia_mm)}%`,
+      dataRegistro: formatarDataHora(new Date(leitura.dataHora)),
+      dataConsulta: formatarDataHora(horaConsulta),
     }));
 
     res.json(resultadoFormatado);
