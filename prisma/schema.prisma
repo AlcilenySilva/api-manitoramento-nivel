@@ -19,5 +19,5 @@ model nivel {
   distancia_cm Float
   dataHora     DateTime @default(now())
 
-  @@map("silo_data")
+  //@@map("silo_data")
 }
