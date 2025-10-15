@@ -47,15 +47,17 @@ app.post("/new-silo", async (req, res) => {
   }
 });
 
-
 app.post("/sensores", async (req, res) => {
-  const { distancia_cm, id } = req.body;
+  const { distancia_mm, id } = req.body;
 
   try {
+    
+    const distancia_cm = distancia_mm / 10;
+
     const newReading = await prisma.nivel.update({
       where: { id },
       data: {
-        distancia_cm,
+        distancia_cm: distancia_cm,
         dataHora: new Date(),
       },
     });
@@ -66,7 +68,8 @@ app.post("/sensores", async (req, res) => {
       message: "Leitura salva com sucesso.",
       id: newReading.id,
       silo_name: newReading.silo_name,
-      distancia_cm: newReading.distancia_cm,
+      distancia_mm: distancia_mm,
+      distancia_cm: distancia_cm,
       dataHora: formatarDataHora(new Date(newReading.dataHora)),
     });
   } catch (error) {
