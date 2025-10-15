@@ -7,7 +7,6 @@ const prisma = new PrismaClient();
 
 app.use(express.json());
 
-
 function formatarDataHora(data) {
   const dia = String(data.getDate()).padStart(2, "0");
   const mes = String(data.getMonth() + 1).padStart(2, "0");
@@ -23,13 +22,14 @@ function converterParaPorcentagem(distancia_cm, altura_total_cm = 100) {
   if (altura_racao > altura_total_cm) return 100;
   return Math.round((altura_racao / altura_total_cm) * 100);
 }
+
+
 app.post("/new-silo", async (req, res) => {
   const { silo_name } = req.body;
-
   try {
     const newSilo = await prisma.nivel.create({
       data: {
-        silo_name: silo_name,
+        silo_name,
         distancia_cm: 0,
       },
     });
@@ -47,14 +47,15 @@ app.post("/new-silo", async (req, res) => {
   }
 });
 
+
 app.post("/sensores", async (req, res) => {
-  const { distancia_mm, id } = req.body;
+  const { distancia_cm, id } = req.body;
 
   try {
     const newReading = await prisma.nivel.update({
       where: { id },
       data: {
-        distancia_mm: distancia_mm,
+        distancia_cm,
         dataHora: new Date(),
       },
     });
@@ -65,7 +66,7 @@ app.post("/sensores", async (req, res) => {
       message: "Leitura salva com sucesso.",
       id: newReading.id,
       silo_name: newReading.silo_name,
-      distancia_mm: newReading.distancia_mm,
+      distancia_cm: newReading.distancia_cm,
       dataHora: formatarDataHora(new Date(newReading.dataHora)),
     });
   } catch (error) {
@@ -77,13 +78,12 @@ app.post("/sensores", async (req, res) => {
 app.get("/", async (req, res) => {
   try {
     const leituras = await prisma.nivel.findMany();
-
     const horaConsulta = new Date();
 
     const resultadoFormatado = leituras.map((leitura) => ({
       silo_name: leitura.silo_name,
-      distancia_bruta_mm: leitura.distancia_mm,
-      porcentagem: `${converterParaPorcentagem(leitura.distancia_mm)}%`,
+      distancia_bruta_cm: leitura.distancia_cm,
+      porcentagem: `${converterParaPorcentagem(leitura.distancia_cm)}%`,
       dataRegistro: formatarDataHora(new Date(leitura.dataHora)),
       dataConsulta: formatarDataHora(horaConsulta),
     }));
@@ -91,7 +91,7 @@ app.get("/", async (req, res) => {
     res.json(resultadoFormatado);
   } catch (error) {
     console.error("Erro ao buscar os dados:", error);
-    res.status(500).json({ erro: "Erro ao buscar os dados." });
+    res.status(500).json({ erro: "Erro ao buscar os dados servidor." });
   }
 });
 
