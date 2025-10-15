@@ -2,7 +2,8 @@
   "name": "api-monitoramento-nivel-silo",
   "version": "1.0.0",
   "main": "api.js",
-  "scripts": {
+  "scripts": { 
+    "build": "npm install",
    "start": "npx prisma migrate deploy && node api.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
