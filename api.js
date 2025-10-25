@@ -48,14 +48,13 @@ app.post("/new-silo", async (req, res) => {
 });
 
 app.post("/sensores", async (req, res) => {
-  const { distancia_mm, id } = req.body;
+  const { distancia_mm, silo_id } = req.body; 
 
   try {
-    
     const distancia_cm = distancia_mm / 10;
 
     const newReading = await prisma.nivel.update({
-      where: { id },
+      where: { silo_name: silo_id }, 
       data: {
         distancia_cm: distancia_cm,
         dataHora: new Date(),
@@ -66,7 +65,6 @@ app.post("/sensores", async (req, res) => {
 
     res.status(201).json({
       message: "Leitura salva com sucesso.",
-      id: newReading.id,
       silo_name: newReading.silo_name,
       distancia_mm: distancia_mm,
       distancia_cm: distancia_cm,
@@ -77,6 +75,7 @@ app.post("/sensores", async (req, res) => {
     res.status(500).json({ erro: "Erro ao salvar os dados no banco de dados." });
   }
 });
+
 
 app.get("/", async (req, res) => {
   try {
